@@ -4,6 +4,7 @@ mod sphere;
 mod hittable;
 mod camera;
 
+use rand::random;
 use ray::Ray;
 use sphere::Sphere;
 use vec::Color;
@@ -35,8 +36,7 @@ fn get_world() -> World {
     w
 }
 
-fn ray_color(r: Ray) -> Color {
-    let w = get_world();
+fn ray_color(r: Ray, w: &World) -> Color {
     match get_closest_hit_in_range(&w.hit(r), 0.0, 100.0) {
         None => ray_color_blue_gradient(r),
         Some(h) => {
@@ -49,17 +49,27 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let img_width: usize = 1024;
     let img_height: usize = (img_width as f32 / aspect_ratio) as usize;
+    let number_of_samples = 10;
 
     let cam = camera::Camera::new();
 
     let mut img = vec![vec![Color { x: 0.0, y: 0.0, z: 0.0 }; img_width]; img_height];
 
+    let w = get_world();
+
     for (i, row) in img.iter_mut().enumerate() {
         eprintln!("Rows remaining {}", img_height - i);
         for (j, cell) in row.iter_mut().enumerate() {
-            let pi = (img_height - i - 1) as f32 / (img_height - 1) as f32;
-            let pj = j as f32 / (img_width - 1) as f32;
-            *cell = ray_color(cam.get_ray(pi, pj));
+            let (r, c) = ((img_height - i - 1) as f32, j as f32);
+
+            let get_random_offset = || random::<f32>() * 2.0 - 1.0;
+            for _ in 0..number_of_samples {
+                let u = (r + get_random_offset()) / (img_height - 1) as f32;
+                let v = (c + get_random_offset()) / (img_width - 1) as f32;
+                *cell = *cell + ray_color(cam.get_ray(u, v), &w);
+            }
+
+            *cell = *cell / (number_of_samples as f32);
         }
     }
 
