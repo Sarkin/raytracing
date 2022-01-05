@@ -1,5 +1,6 @@
 mod camera;
 mod hittable;
+mod rand;
 mod ray;
 mod sphere;
 mod vec;
@@ -7,7 +8,6 @@ mod vec;
 use hittable::get_closest_hit_in_range;
 use hittable::Hittable;
 use hittable::World;
-use rand::random;
 use ray::Ray;
 use sphere::Sphere;
 use vec::Color;
@@ -59,24 +59,26 @@ fn get_world() -> World {
     w
 }
 
-fn ray_color(r: Ray, w: &World) -> Color {
-    match get_closest_hit_in_range(&w.hit(r), 0.0, 100.0) {
+fn ray_color(r: Ray, w: &World, depth: u32) -> Color {
+    if depth == 0 {
+        return Color { x: 0.0, y: 0.0, z: 0.0 };
+    }
+
+    match get_closest_hit_in_range(&w.hit(r), 0.001, 100.0) {
         None => ray_color_blue_gradient(r),
         Some(h) => {
-            (h.n + Vec3 {
-                x: 1.0,
-                y: 1.0,
-                z: 1.0,
-            }) * 0.5 // TODO: consider op Vec + f32?
+            let new_ray = Ray { origin: h.p, d: h.n + rand::random_in_sphere() };
+            ray_color(new_ray, w, depth - 1) * 0.90
         }
     }
 }
 
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
-    let img_width: usize = 1024;
+    let img_width: usize = 300;
     let img_height: usize = (img_width as f32 / aspect_ratio) as usize;
-    let number_of_samples = 10;
+    let number_of_samples = 100;
+    let depth = 300;
 
     let cam = camera::Camera::new();
 
@@ -99,11 +101,10 @@ fn main() {
         for (j, cell) in row.iter_mut().enumerate() {
             let (r, c) = ((img_height - i - 1) as f32, j as f32);
 
-            let get_random_offset = || random::<f32>() * 2.0 - 1.0;
             for _ in 0..number_of_samples {
-                let u = (r + get_random_offset()) / (img_height - 1) as f32;
-                let v = (c + get_random_offset()) / (img_width - 1) as f32;
-                *cell = *cell + ray_color(cam.get_ray(u, v), &w);
+                let u = (r + rand::get_random_offset()) / (img_height - 1) as f32;
+                let v = (c + rand::get_random_offset()) / (img_width - 1) as f32;
+                *cell = *cell + ray_color(cam.get_ray(u, v), &w, depth);
             }
 
             *cell = *cell / (number_of_samples as f32);
