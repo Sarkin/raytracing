@@ -1,8 +1,8 @@
-use crate::Color;
-use crate::Ray;
-use crate::Point;
-use crate::Vec3;
 use crate::rand;
+use crate::Color;
+use crate::Point;
+use crate::Ray;
+use crate::Vec3;
 use std::borrow::Borrow;
 
 #[derive(Debug, Clone, Copy)]
@@ -38,10 +38,13 @@ pub struct Lambertian {
 
 impl Material for Lambertian {
     fn scatter(&self, r: Ray, h: HitRecord) -> Option<ScatterResult> {
-        let new_ray = Ray { origin: h.p, d: h.n + rand::random_in_sphere() };
+        let new_ray = Ray {
+            origin: h.p,
+            d: h.n + rand::random_in_sphere(),
+        };
         Some(ScatterResult {
             attenuation: self.albedo,
-            scattered_ray: new_ray
+            scattered_ray: new_ray,
         })
     }
 }
@@ -57,10 +60,20 @@ impl Hittable for Object {
     }
 }
 
-pub fn get_closest_hit_in_range<'a>(hits: &[HitRecordWithMaterial<'a>], tmin: f32, tmax: f32) -> Option<HitRecordWithMaterial<'a>> {
+pub fn get_closest_hit_in_range<'a>(
+    hits: &[HitRecordWithMaterial<'a>],
+    tmin: f32,
+    tmax: f32,
+) -> Option<HitRecordWithMaterial<'a>> {
     hits.iter()
         .filter(|h| tmin <= h.hit_record.t && h.hit_record.t <= tmax)
-        .reduce(|a, b| if a.hit_record.t <= b.hit_record.t { a } else { b })
+        .reduce(|a, b| {
+            if a.hit_record.t <= b.hit_record.t {
+                a
+            } else {
+                b
+            }
+        })
         .copied()
 }
 
@@ -77,7 +90,14 @@ impl World {
     pub fn hit(&self, r: Ray) -> Vec<HitRecordWithMaterial> {
         let mut hits = Vec::<HitRecordWithMaterial>::new();
         for object in &self.objects {
-            let mut obj_hits = object.hit(r).into_iter().map(|h| HitRecordWithMaterial { hit_record: h, material: object.material.borrow() }).collect();
+            let mut obj_hits = object
+                .hit(r)
+                .into_iter()
+                .map(|h| HitRecordWithMaterial {
+                    hit_record: h,
+                    material: object.material.borrow(),
+                })
+                .collect();
             hits.append(&mut obj_hits);
         }
         hits
