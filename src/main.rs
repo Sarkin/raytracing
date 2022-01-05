@@ -8,6 +8,8 @@ mod vec;
 use hittable::get_closest_hit_in_range;
 use hittable::Hittable;
 use hittable::World;
+use hittable::Object;
+use hittable::Lambertian;
 use ray::Ray;
 use sphere::Sphere;
 use vec::Color;
@@ -24,38 +26,47 @@ fn ppm_print(img: &[Vec<Color>]) {
 }
 
 fn ray_color_blue_gradient(r: Ray) -> Color {
-    let u = r.d.unit();
-    let t = (u.y + 1.0) / 2.0;
+    let u = r.d.unit(); let t = (u.y + 1.0) / 2.0;
     Color {
         x: 1.0,
         y: 1.0,
         z: 1.0,
     } * (1.0 - t)
-        + Color {
-            x: 0.5,
-            y: 0.7,
-            z: 1.0,
-        } * t
+    + Color {
+        x: 0.5,
+        y: 0.7,
+        z: 1.0,
+    } * t
 }
 
 fn get_world() -> World {
     let mut w: World = Default::default();
-    w.add_object(Box::new(Sphere {
-        o: Point {
-            x: 0.0,
-            y: 0.0,
-            z: -1.0,
-        },
-        r: 0.5,
-    }));
-    w.add_object(Box::new(Sphere {
-        o: Point {
-            x: 0.0,
-            y: -100.5,
-            z: -1.0,
-        },
-        r: 100.0,
-    }));
+    w.add_object(Object {
+        hittable: Box::new(Sphere {
+            o: Point {
+                x: 0.0,
+                y: 0.0,
+                z: -1.0,
+            },
+            r: 0.5
+        }),
+        material: Box::new(Lambertian {
+            albedo: Default::default()
+        })
+    });
+    w.add_object(Object {
+        hittable: Box::new(Sphere {
+            o: Point {
+                x: 0.0,
+                y: -100.5,
+                z: -1.0,
+            },
+            r: 0.5
+        }),
+        material: Box::new(Lambertian {
+            albedo: Default::default()
+        })
+    });
     w
 }
 
@@ -64,21 +75,21 @@ fn ray_color(r: Ray, w: &World, depth: u32) -> Color {
         return Color { x: 0.0, y: 0.0, z: 0.0 };
     }
 
-    match get_closest_hit_in_range(&w.hit(r), 0.001, 100.0) {
+    match get_closest_hit_in_range(&w.hit(r), 0.001, f32::MAX) {
         None => ray_color_blue_gradient(r),
         Some(h) => {
-            let new_ray = Ray { origin: h.p, d: h.n + rand::random_in_sphere() };
-            ray_color(new_ray, w, depth - 1) * 0.90
+            let new_ray = h.material.scatter(r, h.hit_record).unwrap().scattered_ray;
+            ray_color(new_ray, w, depth - 1) * 0.50
         }
     }
 }
 
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
-    let img_width: usize = 300;
+    let img_width: usize = 1000;
     let img_height: usize = (img_width as f32 / aspect_ratio) as usize;
-    let number_of_samples = 100;
-    let depth = 300;
+    let number_of_samples = 10;
+    let depth = 50;
 
     let cam = camera::Camera::new();
 
