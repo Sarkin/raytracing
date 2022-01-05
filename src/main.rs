@@ -28,9 +28,9 @@ fn ray_color_blue_gradient(r: Ray) -> Color {
 }
 
 fn get_world() -> World {
-    let s = Sphere { o: Point{ x: 0.0, y: 0.0, z: -1.0 }, r: 0.5 };
     let mut w: World = Default::default();
-    w.add_object(Box::new(s));
+    w.add_object(Box::new(Sphere { o: Point{ x: 0.0, y: 0.0, z: -1.0 }, r: 0.5 }));
+    w.add_object(Box::new(Sphere { o: Point{ x: 0.0, y: -100.5, z: -1.0 }, r: 100.0 }));
     w
 }
 
