@@ -1,5 +1,5 @@
-use std::ops;
 use std::fmt;
+use std::ops;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Vec3 {
@@ -16,7 +16,11 @@ impl ops::Add for Vec3 {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
-        Self {x: self.x + other.x, y: self.y + other.y, z: self.z + other.z}
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
     }
 }
 
@@ -24,7 +28,11 @@ impl ops::Neg for Vec3 {
     type Output = Self;
 
     fn neg(self) -> Self {
-        Self {x: -self.x, y: -self.y, z: -self.z}
+        Self {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
     }
 }
 
@@ -36,25 +44,21 @@ impl ops::Sub for Vec3 {
     }
 }
 
-// impl ops::Mul for Vec3 {
-    // type Output = Self;
-
-    // fn mul(self, other: Self) -> Self {
-        // self + (-other)
-    // }
-// }
-
 impl ops::Mul<f32> for Vec3 {
     type Output = Self;
-    
+
     fn mul(self, m: f32) -> Self {
-        Self {x: self.x * m, y: self.y * m, z: self.z * m}
+        Self {
+            x: self.x * m,
+            y: self.y * m,
+            z: self.z * m,
+        }
     }
 }
 
 impl ops::Div<f32> for Vec3 {
     type Output = Self;
-    
+
     fn div(self, m: f32) -> Self {
         self * (1.0 / m)
     }

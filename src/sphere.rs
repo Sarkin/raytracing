@@ -1,19 +1,19 @@
-use crate::vec::dot;
-use crate::Ray;
-use crate::Point;
-use crate::hittable::Hittable;
 use crate::hittable::HitRecord;
+use crate::hittable::Hittable;
+use crate::vec::dot;
+use crate::Point;
+use crate::Ray;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Sphere {
     pub o: Point,
-    pub r: f32
+    pub r: f32,
 }
 
 enum QuadraticSolution {
     NoSolution,
     OneSolution(f32),
-    TwoSolutions(f32, f32)
+    TwoSolutions(f32, f32),
 }
 
 // a*x^2 + b*x + c = 0
@@ -32,7 +32,7 @@ fn solve_quadratic(a: f32, b: f32, c: f32) -> QuadraticSolution {
 enum RaySphereIntersection {
     NoIntersection,
     OnePoint(f32),
-    TwoPoints(f32, f32)
+    TwoPoints(f32, f32),
 }
 
 fn intersect_sphere_ray(s: Sphere, r: Ray) -> RaySphereIntersection {
@@ -45,7 +45,7 @@ fn intersect_sphere_ray(s: Sphere, r: Ray) -> RaySphereIntersection {
     match solve_quadratic(a, b, c) {
         QuadraticSolution::NoSolution => RaySphereIntersection::NoIntersection,
         QuadraticSolution::OneSolution(t) => RaySphereIntersection::OnePoint(t),
-        QuadraticSolution::TwoSolutions(t1, t2) => RaySphereIntersection::TwoPoints(t1, t2)
+        QuadraticSolution::TwoSolutions(t1, t2) => RaySphereIntersection::TwoPoints(t1, t2),
     }
 }
 
@@ -53,7 +53,7 @@ impl Hittable for Sphere {
     fn hit(&self, r: Ray) -> Vec<HitRecord> {
         let mut hits: Vec<HitRecord> = Vec::new();
 
-        let get_hit_record = |t: f32| { 
+        let get_hit_record = |t: f32| {
             let p = r.at(t);
             let outward_n = (p - self.o).unit();
             let front_face = dot(outward_n, r.origin - p) > 0.0;
@@ -62,17 +62,17 @@ impl Hittable for Sphere {
                 t,
                 p,
                 n,
-                front_face 
+                front_face,
             }
         };
 
         match intersect_sphere_ray(*self, r) {
             RaySphereIntersection::OnePoint(t) => hits.push(get_hit_record(t)),
-            RaySphereIntersection::TwoPoints(t1, t2) =>  {
+            RaySphereIntersection::TwoPoints(t1, t2) => {
                 hits.push(get_hit_record(t1));
                 hits.push(get_hit_record(t2));
-            },
-            _ => { }
+            }
+            _ => {}
         }
 
         hits

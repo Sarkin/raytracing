@@ -3,7 +3,7 @@ use crate::vec;
 #[derive(Clone, Copy, Debug)]
 pub struct Ray {
     pub origin: vec::Point,
-    pub d: vec::Vec3
+    pub d: vec::Vec3,
 }
 
 impl Ray {
