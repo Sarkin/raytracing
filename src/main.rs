@@ -10,6 +10,7 @@ use vec::Point;
 use vec::Vec3;
 use hittable::Hittable;
 use hittable::get_closest_hit_in_range;
+use hittable::World;
 
 fn ppm_print(img: &[Vec<Color>]) {
     println!("P3\n{} {}\n255", img[0].len(), img.len());
@@ -26,9 +27,16 @@ fn ray_color_blue_gradient(r: Ray) -> Color {
     Color { x: 1.0, y: 1.0, z: 1.0 } * (1.0 - t) + Color { x: 0.5, y: 0.7, z: 1.0 } * t
 }
 
-fn ray_color(r: Ray) -> Color {
+fn get_world() -> World {
     let s = Sphere { o: Point{ x: 0.0, y: 0.0, z: -1.0 }, r: 0.5 };
-    match get_closest_hit_in_range(&s.hit(r), 0.0, 100.0) {
+    let mut w: World = Default::default();
+    w.add_object(Box::new(s));
+    w
+}
+
+fn ray_color(r: Ray) -> Color {
+    let w = get_world();
+    match get_closest_hit_in_range(&w.hit(r), 0.0, 100.0) {
         None => ray_color_blue_gradient(r),
         Some(h) => {
             (h.n + Vec3 { x: 1.0, y: 1.0, z: 1.0 }) * 0.5 // TODO: consider op Vec + f32?
