@@ -1,13 +1,15 @@
 mod ray;
 mod vec;
 mod sphere;
+mod hittable;
 
 use ray::Ray;
 use sphere::Sphere;
-use sphere::get_closest_sphere_ray_intersection;
 use vec::Color;
 use vec::Point;
 use vec::Vec3;
+use hittable::Hittable;
+use hittable::get_closest_hit_in_range;
 
 fn ppm_print(img: &[Vec<Color>]) {
     println!("P3\n{} {}\n255", img[0].len(), img.len());
@@ -26,11 +28,10 @@ fn ray_color_blue_gradient(r: Ray) -> Color {
 
 fn ray_color(r: Ray) -> Color {
     let s = Sphere { o: Point{ x: 0.0, y: 0.0, z: -1.0 }, r: 0.5 };
-    let get_normal = |p: Point| (p - s.o).unit();
-    match get_closest_sphere_ray_intersection(s, r) {
+    match get_closest_hit_in_range(&s.hit(r), 0.0, 100.0) {
         None => ray_color_blue_gradient(r),
-        Some(p) => {
-            (get_normal(p) + Vec3 { x: 1.0, y: 1.0, z: 1.0}) * 0.5 // TODO: consider op Vec + f32?
+        Some(h) => {
+            (h.n + Vec3 { x: 1.0, y: 1.0, z: 1.0 }) * 0.5 // TODO: consider op Vec + f32?
         }
     }
 }
@@ -56,7 +57,7 @@ fn main() {
         for (j, cell) in row.iter_mut().enumerate() {
             let pi = (img_height - i - 1) as f32 / (img_height - 1) as f32;
             let pj = j as f32 / (img_width - 1) as f32;
-            let r = Ray { origin: origin, d: lower_left_corner + vertical * pi + horizontal * pj };
+            let r = Ray { origin, d: lower_left_corner + vertical * pi + horizontal * pj };
             *cell = ray_color(r);
         }
     }

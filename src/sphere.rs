@@ -1,6 +1,8 @@
 use crate::vec::dot;
 use crate::Ray;
 use crate::Point;
+use crate::hittable::Hittable;
+use crate::hittable::HitRecord;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Sphere {
@@ -29,8 +31,8 @@ fn solve_quadratic(a: f32, b: f32, c: f32) -> QuadraticSolution {
 
 enum RaySphereIntersection {
     NoIntersection,
-    OnePoint(Point),
-    TwoPoints(Point, Point)
+    OnePoint(f32),
+    TwoPoints(f32, f32)
 }
 
 fn intersect_sphere_ray(s: Sphere, r: Ray) -> RaySphereIntersection {
@@ -42,15 +44,32 @@ fn intersect_sphere_ray(s: Sphere, r: Ray) -> RaySphereIntersection {
 
     match solve_quadratic(a, b, c) {
         QuadraticSolution::NoSolution => RaySphereIntersection::NoIntersection,
-        QuadraticSolution::OneSolution(t) => RaySphereIntersection::OnePoint(r.at(t)),
-        QuadraticSolution::TwoSolutions(t1, t2) => RaySphereIntersection::TwoPoints(r.at(t1), r.at(t2))
+        QuadraticSolution::OneSolution(t) => RaySphereIntersection::OnePoint(t),
+        QuadraticSolution::TwoSolutions(t1, t2) => RaySphereIntersection::TwoPoints(t1, t2)
     }
 }
 
-pub fn get_closest_sphere_ray_intersection(s: Sphere, r: Ray) -> Option<Point> {
-    match intersect_sphere_ray(s, r) {
-        RaySphereIntersection::NoIntersection => None,
-        RaySphereIntersection::OnePoint(p) => Some(p),
-        RaySphereIntersection::TwoPoints(p, _) => Some(p) // TODO: p is not closer if t is negative
+impl Hittable for Sphere {
+    fn hit(&self, r: Ray) -> Vec<HitRecord> {
+        let mut hits: Vec<HitRecord> = Vec::new();
+
+        let get_hit_record = |t: f32| { 
+            HitRecord {
+                t,
+                p: r.at(t),
+                n: (r.at(t) - self.o).unit()
+            }
+        };
+
+        match intersect_sphere_ray(*self, r) {
+            RaySphereIntersection::OnePoint(t) => hits.push(get_hit_record(t)),
+            RaySphereIntersection::TwoPoints(t1, t2) =>  {
+                hits.push(get_hit_record(t1));
+                hits.push(get_hit_record(t2));
+            },
+            _ => { }
+        }
+
+        hits
     }
 }
