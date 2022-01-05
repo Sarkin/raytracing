@@ -2,6 +2,7 @@ mod ray;
 mod vec;
 mod sphere;
 mod hittable;
+mod camera;
 
 use ray::Ray;
 use sphere::Sphere;
@@ -49,14 +50,7 @@ fn main() {
     let img_width: usize = 1024;
     let img_height: usize = (img_width as f32 / aspect_ratio) as usize;
 
-    let viewport_height = 2.0;
-    let viewport_width = viewport_height * aspect_ratio;
-    let focal_length = 1.0;
-
-    let origin: Point = Default::default();
-    let horizontal = Vec3 { x: viewport_width, y: 0.0, z: 0.0 };
-    let vertical = Vec3 { x: 0.0, y: viewport_height, z: 0.0 };
-    let lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0 - Vec3 { x: 0.0, y: 0.0, z: focal_length };
+    let cam = camera::Camera::new();
 
     let mut img = vec![vec![Color { x: 0.0, y: 0.0, z: 0.0 }; img_width]; img_height];
 
@@ -65,8 +59,7 @@ fn main() {
         for (j, cell) in row.iter_mut().enumerate() {
             let pi = (img_height - i - 1) as f32 / (img_height - 1) as f32;
             let pj = j as f32 / (img_width - 1) as f32;
-            let r = Ray { origin, d: lower_left_corner + vertical * pi + horizontal * pj };
-            *cell = ray_color(r);
+            *cell = ray_color(cam.get_ray(pi, pj));
         }
     }
 

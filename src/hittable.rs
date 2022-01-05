@@ -6,7 +6,8 @@ use crate::vec::Vec3;
 pub struct HitRecord {
     pub t: f32,
     pub p: Point,
-    pub n: Vec3
+    pub n: Vec3,
+    pub front_face: bool
 }
 
 pub trait Hittable {
