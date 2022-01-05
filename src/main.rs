@@ -51,7 +51,11 @@ fn get_world() -> World {
             r: 0.5,
         }),
         material: Box::new(Lambertian {
-            albedo: Default::default(),
+            albedo: Color {
+                x: 0.1,
+                y: 0.2,
+                z: 0.3,
+            },
         }),
     });
     w.add_object(Object {
@@ -64,7 +68,11 @@ fn get_world() -> World {
             r: 100.0,
         }),
         material: Box::new(Lambertian {
-            albedo: Default::default(),
+            albedo: Color {
+                x: 0.1,
+                y: 0.7,
+                z: 0.3,
+            },
         }),
     });
     w
@@ -82,8 +90,10 @@ fn ray_color(r: Ray, w: &World, depth: u32) -> Color {
     match get_closest_hit_in_range(&w.hit(r), 0.001, f32::MAX) {
         None => ray_color_blue_gradient(r),
         Some(h) => {
-            let new_ray = h.material.scatter(r, h.hit_record).unwrap().scattered_ray;
-            ray_color(new_ray, w, depth - 1) * 0.50
+            match h.material.scatter(r, h.hit_record) {
+                Some(s) => ray_color(s.scattered_ray, w, depth -1) * s.attenuation,
+                None => Default::default()
+            }
         }
     }
 }
