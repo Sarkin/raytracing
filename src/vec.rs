@@ -8,6 +8,10 @@ pub struct Vec3 {
     pub z: f32,
 }
 
+pub fn dot(u: Vec3, v: Vec3) -> f32 {
+    u.x * v.x + u.y * v.y + u.z * v.z
+}
+
 impl ops::Add for Vec3 {
     type Output = Self;
 
@@ -31,6 +35,14 @@ impl ops::Sub for Vec3 {
         self + (-other)
     }
 }
+
+// impl ops::Mul for Vec3 {
+    // type Output = Self;
+
+    // fn mul(self, other: Self) -> Self {
+        // self + (-other)
+    // }
+// }
 
 impl ops::Mul<f32> for Vec3 {
     type Output = Self;
