@@ -1,7 +1,7 @@
 use std::ops;
 use std::fmt;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct Vec3 {
     pub x: f32,
     pub y: f32,
@@ -16,6 +16,22 @@ impl ops::Add for Vec3 {
     }
 }
 
+impl ops::Neg for Vec3 {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        Self {x: -self.x, y: -self.y, z: -self.z}
+    }
+}
+
+impl ops::Sub for Vec3 {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        self + (-other)
+    }
+}
+
 impl ops::Mul<f32> for Vec3 {
     type Output = Self;
     
@@ -24,11 +40,21 @@ impl ops::Mul<f32> for Vec3 {
     }
 }
 
-impl ops::Neg for Vec3 {
+impl ops::Div<f32> for Vec3 {
     type Output = Self;
+    
+    fn div(self, m: f32) -> Self {
+        self * (1.0 / m)
+    }
+}
 
-    fn neg(self) -> Self {
-        Self {x: -self.x, y: -self.y, z: -self.z}
+impl Vec3 {
+    pub fn length(&self) -> f32 {
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
+
+    pub fn unit(&self) -> Self {
+        *self / self.length()
     }
 }
 
