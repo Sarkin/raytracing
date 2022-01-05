@@ -37,7 +37,7 @@ pub struct Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, r: Ray, h: HitRecord) -> Option<ScatterResult> {
+    fn scatter(&self, _: Ray, h: HitRecord) -> Option<ScatterResult> {
         let new_ray = Ray {
             origin: h.p,
             d: h.n + rand::random_in_sphere(),

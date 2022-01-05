@@ -6,7 +6,6 @@ mod sphere;
 mod vec;
 
 use hittable::get_closest_hit_in_range;
-use hittable::Hittable;
 use hittable::Lambertian;
 use hittable::Object;
 use hittable::World;
@@ -62,7 +61,7 @@ fn get_world() -> World {
                 y: -100.5,
                 z: -1.0,
             },
-            r: 0.5,
+            r: 100.0,
         }),
         material: Box::new(Lambertian {
             albedo: Default::default(),
