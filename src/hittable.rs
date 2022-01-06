@@ -3,6 +3,7 @@ use crate::Color;
 use crate::Point;
 use crate::Ray;
 use crate::Vec3;
+use crate::vec::dot;
 use std::borrow::Borrow;
 
 #[derive(Debug, Clone, Copy)]
@@ -38,10 +39,35 @@ pub struct Lambertian {
 
 impl Material for Lambertian {
     fn scatter(&self, _: Ray, h: HitRecord) -> Option<ScatterResult> {
+        let mut new_ray = Ray {
+            origin: h.p,
+            d: rand::random_in_hemisphere(h.n),
+        };
+
+        if new_ray.d.length() < 1e-8 {
+            new_ray.d = h.n;
+        }
+
+        Some(ScatterResult {
+            attenuation: self.albedo,
+            scattered_ray: new_ray,
+        })
+    }
+}
+
+pub struct Metal {
+    pub albedo: Color,
+}
+
+impl Material for Metal {
+    fn scatter(&self, r: Ray, h: HitRecord) -> Option<ScatterResult> {
+        let op = h.p - r.origin;
+        let pop = (h.p + op) + h.n * dot(op, h.n).abs() * 2.0;
         let new_ray = Ray {
             origin: h.p,
-            d: h.n + rand::random_in_sphere(),
+            d: pop - h.p,
         };
+
         Some(ScatterResult {
             attenuation: self.albedo,
             scattered_ray: new_ray,

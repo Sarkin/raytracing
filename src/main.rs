@@ -7,6 +7,7 @@ mod vec;
 
 use hittable::get_closest_hit_in_range;
 use hittable::Lambertian;
+use hittable::Metal;
 use hittable::Object;
 use hittable::World;
 use ray::Ray;
@@ -61,6 +62,23 @@ fn get_world() -> World {
     w.add_object(Object {
         hittable: Box::new(Sphere {
             o: Point {
+                x: 1.0,
+                y: 0.0,
+                z: -1.0,
+            },
+            r: 0.5,
+        }),
+        material: Box::new(Metal {
+            albedo: Color {
+                x: 0.3,
+                y: 0.6,
+                z: 0.3,
+            },
+        }),
+    });
+    w.add_object(Object {
+        hittable: Box::new(Sphere {
+            o: Point {
                 x: 0.0,
                 y: -100.5,
                 z: -1.0,
@@ -102,8 +120,8 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let img_width: usize = 1000;
     let img_height: usize = (img_width as f32 / aspect_ratio) as usize;
-    let number_of_samples = 10;
-    let depth = 50;
+    let number_of_samples = 200;
+    let depth = 60;
 
     let cam = camera::Camera::new();
 
