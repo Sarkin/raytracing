@@ -49,7 +49,7 @@ fn get_world() -> World {
                 y: 0.0,
                 z: -1.0,
             },
-            r: 0.5,
+            r: 0.4,
         }),
         material: Box::new(Lambertian {
             albedo: Color {
@@ -66,14 +66,33 @@ fn get_world() -> World {
                 y: 0.0,
                 z: -1.0,
             },
-            r: 0.5,
+            r: 0.4,
         }),
         material: Box::new(Metal {
             albedo: Color {
-                x: 0.3,
-                y: 0.6,
-                z: 0.3,
+                x: 0.5,
+                y: 0.5,
+                z: 0.5,
             },
+            fuzziness: 0.0,
+        }),
+    });
+    w.add_object(Object {
+        hittable: Box::new(Sphere {
+            o: Point {
+                x: -1.0,
+                y: 0.0,
+                z: -1.0,
+            },
+            r: 0.4,
+        }),
+        material: Box::new(Metal {
+            albedo: Color {
+                x: 0.5,
+                y: 0.5,
+                z: 0.5,
+            },
+            fuzziness: 0.2,
         }),
     });
     w.add_object(Object {
@@ -105,11 +124,16 @@ fn ray_color(r: Ray, w: &World, depth: u32) -> Color {
         };
     }
 
-    match get_closest_hit_in_range(&w.hit(r), 0.001, f32::MAX) {
+    match get_closest_hit_in_range(&w.hit(r), 0.01, f32::MAX) {
         None => ray_color_blue_gradient(r),
         Some(h) => {
+            // eprintln!("Incoming {:#?}", r);
+            // eprintln!("Hit {} {} {:#?}", depth, h.object_id, h.hit_record);
+            // if !h.hit_record.front_face {
+                // panic!("");
+            // }
             match h.material.scatter(r, h.hit_record) {
-                Some(s) => ray_color(s.scattered_ray, w, depth -1) * s.attenuation,
+                Some(s) => ray_color(s.scattered_ray, w, depth - 1) * s.attenuation,
                 None => Default::default()
             }
         }
@@ -120,8 +144,8 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let img_width: usize = 1000;
     let img_height: usize = (img_width as f32 / aspect_ratio) as usize;
-    let number_of_samples = 200;
-    let depth = 60;
+    let number_of_samples = 15;
+    let depth = 3;
 
     let cam = camera::Camera::new();
 

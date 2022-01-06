@@ -15,9 +15,10 @@ pub struct HitRecord {
 }
 
 #[derive(Clone, Copy)]
-pub struct HitRecordWithMaterial<'a> {
+pub struct WorldHitRecord<'a> {
     pub hit_record: HitRecord,
     pub material: &'a dyn Material,
+    pub object_id: u32,
 }
 
 pub trait Hittable {
@@ -57,6 +58,7 @@ impl Material for Lambertian {
 
 pub struct Metal {
     pub albedo: Color,
+    pub fuzziness: f32,
 }
 
 impl Material for Metal {
@@ -65,7 +67,7 @@ impl Material for Metal {
         let pop = (h.p + op) + h.n * dot(op, h.n).abs() * 2.0;
         let new_ray = Ray {
             origin: h.p,
-            d: pop - h.p,
+            d: pop - h.p + self.fuzziness * rand::random_in_sphere(),
         };
 
         Some(ScatterResult {
@@ -87,10 +89,10 @@ impl Hittable for Object {
 }
 
 pub fn get_closest_hit_in_range<'a>(
-    hits: &[HitRecordWithMaterial<'a>],
+    hits: &[WorldHitRecord<'a>],
     tmin: f32,
     tmax: f32,
-) -> Option<HitRecordWithMaterial<'a>> {
+) -> Option<WorldHitRecord<'a>> {
     hits.iter()
         .filter(|h| tmin <= h.hit_record.t && h.hit_record.t <= tmax)
         .reduce(|a, b| {
@@ -113,15 +115,16 @@ impl World {
         self.objects.push(object);
     }
 
-    pub fn hit(&self, r: Ray) -> Vec<HitRecordWithMaterial> {
-        let mut hits = Vec::<HitRecordWithMaterial>::new();
-        for object in &self.objects {
+    pub fn hit(&self, r: Ray) -> Vec<WorldHitRecord> {
+        let mut hits = Vec::<WorldHitRecord>::new();
+        for (i, object) in self.objects.iter().enumerate() {
             let mut obj_hits = object
                 .hit(r)
                 .into_iter()
-                .map(|h| HitRecordWithMaterial {
+                .map(|h| WorldHitRecord {
                     hit_record: h,
                     material: object.material.borrow(),
+                    object_id: i as u32,
                 })
                 .collect();
             hits.append(&mut obj_hits);
