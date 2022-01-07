@@ -1,0 +1,34 @@
+#!/bin/bash
+
+CHECK='\xE2\x9C\x94'
+CROSS='\xE2\x9D\x8C'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+GOOD="$GREEN $CHECK$NC"
+BAD="$RED $CROSS$NC"
+
+errors=0
+
+echo "checking formatting.."
+if cargo fmt -- --check > /dev/null 2>&1; then
+    echo -e "$GOOD formatting"
+else
+    echo -e "$BAD formatting"
+    errors=1
+fi
+
+echo "running tests"
+if cargo test > /dev/null 2>&1; then
+    echo -e "$GOOD tests"
+else
+    echo -e "$BAD tests"
+    errors=1
+fi
+
+if [ $errors -ne 0 ]; then
+    echo "pre-commit hook fail"
+fi
+
+exit $errors
