@@ -61,18 +61,49 @@ pub struct Metal {
     pub fuzziness: f32,
 }
 
+fn reflect_vector(v: Vec3, n: Vec3) -> Vec3 {
+    v - 2.0 * dot(v, n) * n
+}
+
 impl Material for Metal {
     fn scatter(&self, r: Ray, h: HitRecord) -> Option<ScatterResult> {
-        let op = h.p - r.origin;
-        let pop = (h.p + op) + h.n * dot(op, h.n).abs() * 2.0;
+        let reflected_d = reflect_vector(r.d, h.n);
         let new_ray = Ray {
             origin: h.p,
-            d: pop - h.p + self.fuzziness * rand::random_in_sphere(),
+            d: reflected_d + self.fuzziness * rand::random_in_sphere(),
         };
 
         Some(ScatterResult {
             attenuation: self.albedo,
             scattered_ray: new_ray,
+        })
+    }
+}
+
+pub struct Dielectric {
+    pub ir: f32,
+}
+
+impl Material for Dielectric {
+    fn scatter(&self, r: Ray, h: HitRecord) -> Option<ScatterResult> {
+        let unit_d = r.d.unit();
+        let refraction_rate = if h.front_face { 1.0 / self.ir } else { self.ir };
+        let cos_theta = dot(-unit_d, h.n).min(1.0);
+        let in_x = unit_d + cos_theta * h.n;
+        let sin_theta = in_x.length();
+
+        let d: Vec3;
+        if (sin_theta * refraction_rate).abs() > 1.0 {
+            d = reflect_vector(r.d, h.n);
+        } else {
+            let ray_x = refraction_rate * in_x;
+            let ray_y = -(1.0 - ray_x.length_squared()).sqrt() * h.n;
+            d = ray_x + ray_y;
+        }
+
+        Some(ScatterResult {
+            attenuation: Color { x: 1.0, y: 1.0, z: 1.0 },
+            scattered_ray: Ray { origin: h.p, d },
         })
     }
 }

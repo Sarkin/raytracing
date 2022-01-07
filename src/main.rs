@@ -8,6 +8,7 @@ mod vec;
 use hittable::get_closest_hit_in_range;
 use hittable::Lambertian;
 use hittable::Metal;
+use hittable::Dielectric;
 use hittable::Object;
 use hittable::World;
 use ray::Ray;
@@ -68,13 +69,8 @@ fn get_world() -> World {
             },
             r: 0.4,
         }),
-        material: Box::new(Metal {
-            albedo: Color {
-                x: 0.5,
-                y: 0.5,
-                z: 0.5,
-            },
-            fuzziness: 0.0,
+        material: Box::new(Dielectric {
+            ir: 1.5
         }),
     });
     w.add_object(Object {
@@ -124,7 +120,7 @@ fn ray_color(r: Ray, w: &World, depth: u32) -> Color {
         };
     }
 
-    match get_closest_hit_in_range(&w.hit(r), 0.01, f32::MAX) {
+    match get_closest_hit_in_range(&w.hit(r), 0.0001, f32::MAX) {
         None => ray_color_blue_gradient(r),
         Some(h) => {
             // eprintln!("Incoming {:#?}", r);
@@ -144,8 +140,8 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let img_width: usize = 1000;
     let img_height: usize = (img_width as f32 / aspect_ratio) as usize;
-    let number_of_samples = 15;
-    let depth = 3;
+    let number_of_samples = 10;
+    let depth = 10;
 
     let cam = camera::Camera::new();
 
