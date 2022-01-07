@@ -5,16 +5,16 @@ mod ray;
 mod sphere;
 mod vec;
 
-use std::sync::atomic::{AtomicUsize, Ordering};
-use rayon::prelude::*;
 use hittable::get_closest_hit_in_range;
+use hittable::Dielectric;
 use hittable::Lambertian;
 use hittable::Metal;
-use hittable::Dielectric;
 use hittable::Object;
 use hittable::World;
 use ray::Ray;
+use rayon::prelude::*;
 use sphere::Sphere;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use vec::Color;
 use vec::Point;
 use vec::Vec3;
@@ -71,9 +71,7 @@ fn get_world() -> World {
             },
             r: 0.4,
         }),
-        material: Box::new(Dielectric {
-            ir: 1.5
-        }),
+        material: Box::new(Dielectric { ir: 1.5 }),
     });
     w.add_object(Object {
         hittable: Box::new(Sphere {
@@ -86,11 +84,11 @@ fn get_world() -> World {
         }),
         material: Box::new(Metal {
             albedo: Color {
-                x: 0.5,
+                x: 0.6,
                 y: 0.5,
                 z: 0.5,
             },
-            fuzziness: 0.2,
+            fuzziness: 0.0,
         }),
     });
     w.add_object(Object {
@@ -124,17 +122,10 @@ fn ray_color(r: Ray, w: &World, depth: u32) -> Color {
 
     match get_closest_hit_in_range(&w.hit(r), 0.0001, f32::MAX) {
         None => ray_color_blue_gradient(r),
-        Some(h) => {
-            // eprintln!("Incoming {:#?}", r);
-            // eprintln!("Hit {} {} {:#?}", depth, h.object_id, h.hit_record);
-            // if !h.hit_record.front_face {
-                // panic!("");
-            // }
-            match h.material.scatter(r, h.hit_record) {
-                Some(s) => ray_color(s.scattered_ray, w, depth - 1) * s.attenuation,
-                None => Default::default()
-            }
-        }
+        Some(h) => match h.material.scatter(r, h.hit_record) {
+            Some(s) => ray_color(s.scattered_ray, w, depth - 1) * s.attenuation,
+            None => Default::default(),
+        },
     }
 }
 

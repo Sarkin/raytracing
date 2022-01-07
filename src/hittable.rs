@@ -1,9 +1,9 @@
 use crate::rand;
+use crate::vec::dot;
 use crate::Color;
 use crate::Point;
 use crate::Ray;
 use crate::Vec3;
-use crate::vec::dot;
 use std::borrow::Borrow;
 
 #[derive(Debug, Clone, Copy)]
@@ -102,7 +102,11 @@ impl Material for Dielectric {
         }
 
         Some(ScatterResult {
-            attenuation: Color { x: 1.0, y: 1.0, z: 1.0 },
+            attenuation: Color {
+                x: 1.0,
+                y: 1.0,
+                z: 1.0,
+            },
             scattered_ray: Ray { origin: h.p, d },
         })
     }

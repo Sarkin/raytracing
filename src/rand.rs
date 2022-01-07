@@ -1,6 +1,6 @@
+use crate::vec::dot;
 use crate::Vec3;
 use rand::random;
-use crate::vec::dot;
 
 pub fn get_random_offset() -> f32 {
     random::<f32>() * 2.0 - 1.0
@@ -23,6 +23,6 @@ pub fn random_in_hemisphere(n: Vec3) -> Vec3 {
     let v = random_in_sphere();
     match dot(v, n) < 0.0 {
         true => -v,
-        _ => v
+        _ => v,
     }
 }

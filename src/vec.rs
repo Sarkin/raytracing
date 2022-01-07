@@ -24,18 +24,6 @@ impl ops::Add for Vec3 {
     }
 }
 
-impl ops::Mul for Vec3 {
-    type Output = Self;
-
-    fn mul(self, other: Self) -> Self {
-        Self {
-            x: self.x * other.x,
-            y: self.y * other.y,
-            z: self.z * other.z,
-        }
-    }
-}
-
 impl ops::Neg for Vec3 {
     type Output = Self;
 
@@ -53,6 +41,18 @@ impl ops::Sub for Vec3 {
 
     fn sub(self, other: Self) -> Self {
         self + (-other)
+    }
+}
+
+impl ops::Mul for Vec3 {
+    type Output = Self;
+
+    fn mul(self, other: Self) -> Self {
+        Self {
+            x: self.x * other.x,
+            y: self.y * other.y,
+            z: self.z * other.z,
+        }
     }
 }
 
