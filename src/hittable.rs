@@ -17,7 +17,7 @@ pub struct HitRecord {
 #[derive(Clone, Copy)]
 pub struct WorldHitRecord<'a> {
     pub hit_record: HitRecord,
-    pub material: &'a dyn Material,
+    pub material: &'a (dyn Material + Sync),
     pub object_id: u32,
 }
 
@@ -109,8 +109,8 @@ impl Material for Dielectric {
 }
 
 pub struct Object {
-    pub material: Box<dyn Material>,
-    pub hittable: Box<dyn Hittable>,
+    pub material: Box<dyn Material + Sync>,
+    pub hittable: Box<dyn Hittable + Sync>,
 }
 
 impl Hittable for Object {

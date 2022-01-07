@@ -5,6 +5,8 @@ mod ray;
 mod sphere;
 mod vec;
 
+use std::sync::atomic::{AtomicUsize, Ordering};
+use rayon::prelude::*;
 use hittable::get_closest_hit_in_range;
 use hittable::Lambertian;
 use hittable::Metal;
@@ -138,9 +140,9 @@ fn ray_color(r: Ray, w: &World, depth: u32) -> Color {
 
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
-    let img_width: usize = 1000;
+    let img_width: usize = 1200;
     let img_height: usize = (img_width as f32 / aspect_ratio) as usize;
-    let number_of_samples = 10;
+    let number_of_samples = 200;
     let depth = 10;
 
     let cam = camera::Camera::new();
@@ -159,8 +161,8 @@ fn main() {
 
     let w = get_world();
 
-    for (i, row) in img.iter_mut().enumerate() {
-        eprintln!("Rows remaining {}", img_height - i);
+    let c_rows = AtomicUsize::new(0);
+    img.par_iter_mut().enumerate().for_each(|(i, row)| {
         for (j, cell) in row.iter_mut().enumerate() {
             let (r, c) = ((img_height - i - 1) as f32, j as f32);
 
@@ -172,7 +174,9 @@ fn main() {
 
             *cell = *cell / (number_of_samples as f32);
         }
-    }
+        let rows_done = c_rows.fetch_add(1, Ordering::SeqCst);
+        eprintln!("Rows remaining {}", img_height - rows_done);
+    });
 
     eprintln!("Printing image..");
     ppm_print(&img);
