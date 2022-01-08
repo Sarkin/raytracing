@@ -136,7 +136,7 @@ fn main() {
     let number_of_samples = 200;
     let depth = 10;
 
-    let cam = camera::Camera::new();
+    let cam = camera::Camera::new(90.0, aspect_ratio);
 
     let mut img = vec![
         vec![
