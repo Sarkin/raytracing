@@ -52,7 +52,7 @@ fn get_world() -> World {
                 y: 0.0,
                 z: -1.0,
             },
-            r: 0.4,
+            r: 0.5,
         }),
         material: Box::new(Lambertian {
             albedo: Color {
@@ -65,22 +65,22 @@ fn get_world() -> World {
     w.add_object(Object {
         hittable: Box::new(Sphere {
             o: Point {
-                x: 1.0,
+                x: -1.0,
                 y: 0.0,
                 z: -1.0,
             },
-            r: 0.4,
+            r: -0.5,
         }),
         material: Box::new(Dielectric { ir: 1.5 }),
     });
     w.add_object(Object {
         hittable: Box::new(Sphere {
             o: Point {
-                x: -1.0,
+                x: 1.0,
                 y: 0.0,
                 z: -1.0,
             },
-            r: 0.4,
+            r: 0.5,
         }),
         material: Box::new(Metal {
             albedo: Color {
@@ -129,14 +129,31 @@ fn ray_color(r: Ray, w: &World, depth: u32) -> Color {
     }
 }
 
+fn create_camera(aspect_ratio: f32) -> camera::Camera {
+    let lookfrom = Point {
+        x: -2.0,
+        y: 2.0,
+        z: 1.0,
+    };
+    let lookat = Point {
+        x: 0.0,
+        y: 0.0,
+        z: -1.0,
+    };
+    let vup = Vec3 {
+        x: 0.0,
+        y: 1.0,
+        z: 0.0,
+    };
+    camera::Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio)
+}
+
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let img_width: usize = 1200;
     let img_height: usize = (img_width as f32 / aspect_ratio) as usize;
     let number_of_samples = 200;
     let depth = 10;
-
-    let cam = camera::Camera::new(90.0, aspect_ratio);
 
     let mut img = vec![
         vec![
@@ -150,6 +167,7 @@ fn main() {
         img_height
     ];
 
+    let cam = create_camera(aspect_ratio);
     let w = get_world();
 
     let c_rows = AtomicUsize::new(0);
