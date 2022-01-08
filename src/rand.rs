@@ -6,6 +6,10 @@ pub fn get_random_offset() -> f32 {
     random::<f32>() * 2.0 - 1.0
 }
 
+pub fn get_random_float() -> f32 {
+    random::<f32>()
+}
+
 pub fn random_in_sphere() -> Vec3 {
     loop {
         let v = Vec3 {

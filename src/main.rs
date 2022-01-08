@@ -8,6 +8,7 @@ mod vec;
 use hittable::get_closest_hit_in_range;
 use hittable::Dielectric;
 use hittable::Lambertian;
+use hittable::Material;
 use hittable::Metal;
 use hittable::Object;
 use hittable::World;
@@ -95,10 +96,10 @@ fn get_world() -> World {
         hittable: Box::new(Sphere {
             o: Point {
                 x: 0.0,
-                y: -100.5,
+                y: -500.5,
                 z: -1.0,
             },
-            r: 100.0,
+            r: 500.0,
         }),
         material: Box::new(Lambertian {
             albedo: Color {
@@ -108,6 +109,72 @@ fn get_world() -> World {
             },
         }),
     });
+    w
+}
+
+fn generate_world() -> World {
+    let mut w: World = Default::default();
+
+    let earth_radius = 500.0;
+    let earth_center = Point {
+        x: 0.0,
+        y: -earth_radius,
+        z: 0.0,
+    };
+
+    w.add_object(Object {
+        hittable: Box::new(Sphere {
+            o: earth_center,
+            r: earth_radius,
+        }),
+        material: Box::new(Lambertian {
+            albedo: Color {
+                x: 0.8,
+                y: 0.8,
+                z: 0.8,
+            },
+        }),
+    });
+
+    for xi in -10..10 {
+        for zi in -10..10 {
+            let (x, z) = (
+                (xi * 3) as f32 + rand::get_random_offset(),
+                (zi * 3) as f32 + rand::get_random_offset(),
+            );
+            let r = 0.5;
+            let c =
+                (Point { x, y: 0.0, z } - earth_center).unit() * (earth_radius + r) + earth_center;
+
+            let material_p = rand::get_random_float();
+            let material: Box<dyn Material + Sync>;
+            if material_p > 0.8 {
+                material = Box::new(Metal {
+                    albedo: Color {
+                        x: rand::get_random_float(),
+                        y: rand::get_random_float(),
+                        z: rand::get_random_float(),
+                    },
+                    fuzziness: 0.1 * rand::get_random_float(),
+                });
+            } else if material_p > 0.7 {
+                material = Box::new(Dielectric { ir: 1.5 });
+            } else {
+                material = Box::new(Lambertian {
+                    albedo: Color {
+                        x: rand::get_random_float(),
+                        y: rand::get_random_float(),
+                        z: rand::get_random_float(),
+                    },
+                });
+            }
+            w.add_object(Object {
+                hittable: Box::new(Sphere { o: c, r }),
+                material,
+            });
+        }
+    }
+
     w
 }
 
@@ -131,8 +198,8 @@ fn ray_color(r: Ray, w: &World, depth: u32) -> Color {
 
 fn create_camera(aspect_ratio: f32) -> camera::Camera {
     let lookfrom = Point {
-        x: 0.0,
-        y: 0.0,
+        x: 13.0,
+        y: 5.0,
         z: 2.0,
     };
     let lookat = Point {
@@ -152,8 +219,8 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let img_width: usize = 1200;
     let img_height: usize = (img_width as f32 / aspect_ratio) as usize;
-    let number_of_samples = 300;
-    let depth = 10;
+    let number_of_samples = 400;
+    let depth = 20;
 
     let mut img = vec![
         vec![
@@ -168,7 +235,7 @@ fn main() {
     ];
 
     let cam = create_camera(aspect_ratio);
-    let w = get_world();
+    let w = generate_world();
 
     let c_rows = AtomicUsize::new(0);
     img.par_iter_mut().enumerate().for_each(|(i, row)| {
