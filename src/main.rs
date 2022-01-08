@@ -150,7 +150,7 @@ fn create_camera(aspect_ratio: f32) -> camera::Camera {
 
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
-    let img_width: usize = 600;
+    let img_width: usize = 300;
     let img_height: usize = (img_width as f32 / aspect_ratio) as usize;
     let number_of_samples = 100;
     let depth = 10;
