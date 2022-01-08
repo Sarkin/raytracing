@@ -69,7 +69,7 @@ fn get_world() -> World {
                 y: 0.0,
                 z: -1.0,
             },
-            r: -0.5,
+            r: 0.5,
         }),
         material: Box::new(Dielectric { ir: 1.5 }),
     });
@@ -84,9 +84,9 @@ fn get_world() -> World {
         }),
         material: Box::new(Metal {
             albedo: Color {
-                x: 0.6,
-                y: 0.5,
-                z: 0.5,
+                x: 0.8,
+                y: 0.8,
+                z: 0.8,
             },
             fuzziness: 0.0,
         }),
@@ -131,9 +131,9 @@ fn ray_color(r: Ray, w: &World, depth: u32) -> Color {
 
 fn create_camera(aspect_ratio: f32) -> camera::Camera {
     let lookfrom = Point {
-        x: -2.0,
-        y: 2.0,
-        z: 1.0,
+        x: 0.0,
+        y: 0.0,
+        z: 2.0,
     };
     let lookat = Point {
         x: 0.0,
@@ -145,7 +145,7 @@ fn create_camera(aspect_ratio: f32) -> camera::Camera {
         y: 1.0,
         z: 0.0,
     };
-    camera::Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio)
+    camera::Camera::new(lookfrom, lookat, vup, 90.0, aspect_ratio)
 }
 
 fn main() {

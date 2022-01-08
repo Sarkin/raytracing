@@ -19,8 +19,8 @@ impl Camera {
         let u = cross(vup, w).unit();
         let v = cross(w, u).unit();
 
-        let h = theta.tan();
-        let viewport_height = h;
+        let h = (theta / 2.0).tan();
+        let viewport_height = h * 2.0;
         let viewport_width = viewport_height * aspect_ratio;
         let focal_length = 1.0;
 

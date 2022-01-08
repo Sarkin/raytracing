@@ -55,7 +55,7 @@ impl Hittable for Sphere {
 
         let get_hit_record = |t: f32| {
             let p = r.at(t);
-            let outward_n = (p - self.o).unit();
+            let outward_n = (p - self.o) / self.r;
             let front_face = dot(outward_n, r.origin - p) >= 0.0;
             let n = if front_face { outward_n } else { -outward_n };
             HitRecord {
