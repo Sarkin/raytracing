@@ -3,6 +3,7 @@ use crate::vec::cross;
 use crate::Point;
 use crate::Ray;
 use crate::Vec3;
+use serde::{Deserialize, Serialize};
 use std::f32::consts::PI;
 
 pub struct Camera {
@@ -15,32 +16,35 @@ pub struct Camera {
     v: Vec3,
 }
 
-impl Camera {
-    pub fn new(
-        lookfrom: Point,
-        lookat: Point,
-        vup: Vec3,
-        vfov: f32,
-        aspect_ratio: f32,
-        aperture: f32,
-        focus_dist: f32,
-    ) -> Self {
-        let theta = vfov / 180.0 * PI;
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CameraConfig {
+    pub lookfrom: Point,
+    pub lookat: Point,
+    pub vup: Vec3,
+    pub vfov: f32,
+    pub aspect_ratio: f32,
+    pub aperture: f32,
+    pub focus_dist: f32,
+}
 
-        let w = (lookfrom - lookat).unit();
-        let u = cross(vup, w).unit();
+impl Camera {
+    pub fn new(config: CameraConfig) -> Self {
+        let theta = config.vfov / 180.0 * PI;
+
+        let w = (config.lookfrom - config.lookat).unit();
+        let u = cross(config.vup, w).unit();
         let v = cross(w, u).unit();
 
         let h = (theta / 2.0).tan();
         let viewport_height = h * 2.0;
-        let viewport_width = viewport_height * aspect_ratio;
+        let viewport_width = viewport_height * config.aspect_ratio;
 
-        let origin: Point = lookfrom;
-        let horizontal = u * viewport_width * focus_dist;
-        let vertical = v * viewport_height * focus_dist;
-        let lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0 - w * focus_dist;
+        let origin: Point = config.lookfrom;
+        let horizontal = u * viewport_width * config.focus_dist;
+        let vertical = v * viewport_height * config.focus_dist;
+        let lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0 - w * config.focus_dist;
 
-        let lens_radius = aperture / 2.0;
+        let lens_radius = config.aperture / 2.0;
 
         Self {
             origin,

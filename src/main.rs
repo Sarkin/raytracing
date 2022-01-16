@@ -20,6 +20,8 @@ use vec::Color;
 use vec::Point;
 use vec::Vec3;
 
+use serde::{Deserialize, Serialize};
+
 fn ppm_print(img: &[Vec<Color>]) {
     println!("P3\n{} {}\n255", img[0].len(), img.len());
     for row in img {
@@ -196,36 +198,30 @@ fn ray_color(r: Ray, w: &World, depth: u32) -> Color {
     }
 }
 
-fn create_camera(aspect_ratio: f32) -> camera::Camera {
-    let lookfrom = Point {
-        x: 13.0,
-        y: 5.0,
-        z: 2.0,
-    };
-    // let lookfrom = Point {
-    // x: 1.0,
-    // y: 0.0,
-    // z: 1.0,
-    // };
-    let lookat = Point {
-        x: 0.0,
-        y: 0.0,
-        z: -1.0,
-    };
-    let vup = Vec3 {
-        x: 0.0,
-        y: 1.0,
-        z: 0.0,
-    };
-    camera::Camera::new(lookfrom, lookat, vup, 90.0, aspect_ratio, 0.1, 12.0)
+#[derive(Serialize, Deserialize, Debug)]
+struct RenderConfig {
+    aspect_ratio: f32,
+    img_width: usize,
+    img_height: usize,
+    number_of_samples: u32,
+    depth: u32,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct Config {
+    render_config: RenderConfig,
+    camera_config: camera::CameraConfig,
+}
+
+use std::fs::File;
+use std::io::BufReader;
+
 fn main() {
-    let aspect_ratio = 16.0 / 9.0;
-    let img_width: usize = 500;
-    let img_height: usize = (img_width as f32 / aspect_ratio) as usize;
-    let number_of_samples = 100;
-    let depth = 10;
+    let config_file = File::open("config").expect("Couldn't open file");
+    let buf_reader = BufReader::new(config_file);
+    let config: Config = serde_json::from_reader(buf_reader).expect("Couldn't deserialize config");
+
+    let render_config = config.render_config;
 
     let mut img = vec![
         vec![
@@ -234,30 +230,29 @@ fn main() {
                 y: 0.0,
                 z: 0.0
             };
-            img_width
+            render_config.img_width
         ];
-        img_height
+        render_config.img_height
     ];
 
-    let cam = create_camera(aspect_ratio);
+    let cam = camera::Camera::new(config.camera_config);
     let w = generate_world();
-    // let w = get_world();
 
     let c_rows = AtomicUsize::new(0);
     img.par_iter_mut().enumerate().for_each(|(i, row)| {
         for (j, cell) in row.iter_mut().enumerate() {
-            let (r, c) = ((img_height - i - 1) as f32, j as f32);
+            let (r, c) = ((render_config.img_height - i - 1) as f32, j as f32);
 
-            for _ in 0..number_of_samples {
-                let u = (r + rand::get_random_offset()) / (img_height - 1) as f32;
-                let v = (c + rand::get_random_offset()) / (img_width - 1) as f32;
-                *cell = *cell + ray_color(cam.get_ray(u, v), &w, depth);
+            for _ in 0..render_config.number_of_samples {
+                let u = (r + rand::get_random_offset()) / (render_config.img_height - 1) as f32;
+                let v = (c + rand::get_random_offset()) / (render_config.img_width - 1) as f32;
+                *cell = *cell + ray_color(cam.get_ray(u, v), &w, render_config.depth);
             }
 
-            *cell = *cell / (number_of_samples as f32);
+            *cell = *cell / (render_config.number_of_samples as f32);
         }
         let rows_done = c_rows.fetch_add(1, Ordering::SeqCst);
-        eprintln!("Rows remaining {}", img_height - rows_done);
+        eprintln!("Rows remaining {}", render_config.img_height - rows_done);
     });
 
     eprintln!("Printing image..");

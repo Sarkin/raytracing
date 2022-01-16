@@ -1,0 +1,30 @@
+{
+  "render_config": {
+    "aspect_ratio": 1.7777778,
+    "img_width": 500,
+    "img_height": 281,
+    "number_of_samples": 100,
+    "depth": 10
+  },
+  "camera_config": {
+    "lookfrom": {
+      "x": 13,
+      "y": 5,
+      "z": 2
+    },
+    "lookat": {
+      "x": 0,
+      "y": 0,
+      "z": -1
+    },
+    "vup": {
+      "x": 0,
+      "y": 1,
+      "z": 0
+    },
+    "vfov": 90,
+    "aspect_ratio": 1.7777778,
+    "aperture": 0.1,
+    "focus_dist": 12
+  }
+}
