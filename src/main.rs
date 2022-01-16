@@ -13,14 +13,17 @@ use hittable::Metal;
 use hittable::Object;
 use hittable::World;
 use ray::Ray;
-use rayon::prelude::*;
 use sphere::Sphere;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use vec::Color;
 use vec::Point;
 use vec::Vec3;
 
+use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
+
+use std::fs::File;
+use std::io::BufReader;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 fn ppm_print(img: &[Vec<Color>]) {
     println!("P3\n{} {}\n255", img[0].len(), img.len());
@@ -212,9 +215,6 @@ struct Config {
     render_config: RenderConfig,
     camera_config: camera::CameraConfig,
 }
-
-use std::fs::File;
-use std::io::BufReader;
 
 fn main() {
     let config_file = File::open("config").expect("Couldn't open file");
