@@ -1,10 +1,13 @@
 use crate::hittable::HitRecord;
 use crate::hittable::Hittable;
+use crate::ray::Ray;
 use crate::vec::dot;
-use crate::Point;
-use crate::Ray;
+use crate::vec::Point;
 
-#[derive(Clone, Copy, Debug)]
+use serde::{Deserialize, Serialize};
+use typetag;
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Sphere {
     pub o: Point,
     pub r: f32,
@@ -49,6 +52,7 @@ fn intersect_sphere_ray(s: Sphere, r: Ray) -> RaySphereIntersection {
     }
 }
 
+#[typetag::serde]
 impl Hittable for Sphere {
     fn hit(&self, r: Ray) -> Vec<HitRecord> {
         let mut hits: Vec<HitRecord> = Vec::new();

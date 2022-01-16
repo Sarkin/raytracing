@@ -1,5 +1,6 @@
 use crate::vec::dot;
-use crate::Vec3;
+use crate::vec::Vec3;
+
 use rand::random;
 
 pub fn get_random_offset() -> f32 {

@@ -1,8 +1,8 @@
 use crate::rand;
+use crate::ray::Ray;
 use crate::vec::cross;
-use crate::Point;
-use crate::Ray;
-use crate::Vec3;
+use crate::vec::Point;
+use crate::vec::Vec3;
 use serde::{Deserialize, Serialize};
 use std::f32::consts::PI;
 

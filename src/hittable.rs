@@ -1,10 +1,13 @@
 use crate::rand;
+use crate::ray::Ray;
 use crate::vec::dot;
-use crate::Color;
-use crate::Point;
-use crate::Ray;
-use crate::Vec3;
+use crate::vec::Color;
+use crate::vec::Point;
+use crate::vec::Vec3;
+
 use std::borrow::Borrow;
+
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy)]
 pub struct HitRecord {
@@ -17,11 +20,12 @@ pub struct HitRecord {
 #[derive(Clone, Copy)]
 pub struct WorldHitRecord<'a> {
     pub hit_record: HitRecord,
-    pub material: &'a (dyn Material + Sync),
+    pub material: &'a dyn Material,
     pub object_id: u32,
 }
 
-pub trait Hittable {
+#[typetag::serde(tag = "type")]
+pub trait Hittable: Sync {
     fn hit(&self, r: Ray) -> Vec<HitRecord>;
 }
 
@@ -30,14 +34,17 @@ pub struct ScatterResult {
     pub scattered_ray: Ray,
 }
 
-pub trait Material {
+#[typetag::serde(tag = "type")]
+pub trait Material: Sync {
     fn scatter(&self, r: Ray, h: HitRecord) -> Option<ScatterResult>;
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Lambertian {
     pub albedo: Color,
 }
 
+#[typetag::serde]
 impl Material for Lambertian {
     fn scatter(&self, _: Ray, h: HitRecord) -> Option<ScatterResult> {
         let mut new_ray = Ray {
@@ -56,6 +63,7 @@ impl Material for Lambertian {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Metal {
     pub albedo: Color,
     pub fuzziness: f32,
@@ -65,6 +73,7 @@ fn reflect_vector(v: Vec3, n: Vec3) -> Vec3 {
     v - 2.0 * dot(v, n) * n
 }
 
+#[typetag::serde]
 impl Material for Metal {
     fn scatter(&self, r: Ray, h: HitRecord) -> Option<ScatterResult> {
         let reflected_d = reflect_vector(r.d, h.n);
@@ -80,10 +89,12 @@ impl Material for Metal {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Dielectric {
     pub ir: f32,
 }
 
+#[typetag::serde]
 impl Material for Dielectric {
     fn scatter(&self, r: Ray, h: HitRecord) -> Option<ScatterResult> {
         let unit_d = r.d.unit();
@@ -115,11 +126,13 @@ impl Material for Dielectric {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Object {
-    pub material: Box<dyn Material + Sync>,
-    pub hittable: Box<dyn Hittable + Sync>,
+    pub material: Box<dyn Material>,
+    pub hittable: Box<dyn Hittable>,
 }
 
+#[typetag::serde]
 impl Hittable for Object {
     fn hit(&self, r: Ray) -> Vec<HitRecord> {
         self.hittable.hit(r)
@@ -143,7 +156,7 @@ pub fn get_closest_hit_in_range<'a>(
         .copied()
 }
 
-#[derive(Default)]
+#[derive(Default, Serialize, Deserialize)]
 pub struct World {
     objects: Vec<Object>,
 }

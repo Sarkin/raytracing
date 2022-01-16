@@ -1,0 +1,100 @@
+{
+  "camera_config": {
+    "lookfrom": {
+      "x": 1.0,
+      "y": 0.0,
+      "z": 1.0
+    },
+    "lookat": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": -1.0
+    },
+    "vup": {
+      "x": 0.0,
+      "y": 1.0,
+      "z": 0.0
+    },
+    "vfov": 90.0,
+    "aspect_ratio": 1.7777778,
+    "aperture": 0.1,
+    "focus_dist": 12.0
+  },
+  "world": {
+    "objects": [
+      {
+        "material": {
+          "type": "Lambertian",
+          "albedo": {
+            "x": 0.1,
+            "y": 0.2,
+            "z": 0.3
+          }
+        },
+        "hittable": {
+          "type": "Sphere",
+          "o": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": -1.0
+          },
+          "r": 0.5
+        }
+      },
+      {
+        "material": {
+          "type": "Dielectric",
+          "ir": 1.5
+        },
+        "hittable": {
+          "type": "Sphere",
+          "o": {
+            "x": -1.0,
+            "y": 0.0,
+            "z": -1.0
+          },
+          "r": 0.5
+        }
+      },
+      {
+        "material": {
+          "type": "Metal",
+          "albedo": {
+            "x": 0.8,
+            "y": 0.8,
+            "z": 0.8
+          },
+          "fuzziness": 0.0
+        },
+        "hittable": {
+          "type": "Sphere",
+          "o": {
+            "x": 1.0,
+            "y": 0.0,
+            "z": -1.0
+          },
+          "r": 0.5
+        }
+      },
+      {
+        "material": {
+          "type": "Lambertian",
+          "albedo": {
+            "x": 0.1,
+            "y": 0.7,
+            "z": 0.3
+          }
+        },
+        "hittable": {
+          "type": "Sphere",
+          "o": {
+            "x": 0.0,
+            "y": -500.5,
+            "z": -1.0
+          },
+          "r": 500.0
+        }
+      }
+    ]
+  }
+}
