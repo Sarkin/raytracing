@@ -107,7 +107,7 @@ fn get_scene() -> Scene {
             vfov: 90.0,
             aspect_ratio: 16.0 / 9.0,
             aperture: 0.1,
-            focus_dist: 12.0,
+            focus_dist: 2.0,
         },
         world: w,
     }
