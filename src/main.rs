@@ -202,6 +202,11 @@ fn create_camera(aspect_ratio: f32) -> camera::Camera {
         y: 5.0,
         z: 2.0,
     };
+    // let lookfrom = Point {
+    // x: 1.0,
+    // y: 0.0,
+    // z: 1.0,
+    // };
     let lookat = Point {
         x: 0.0,
         y: 0.0,
@@ -212,15 +217,15 @@ fn create_camera(aspect_ratio: f32) -> camera::Camera {
         y: 1.0,
         z: 0.0,
     };
-    camera::Camera::new(lookfrom, lookat, vup, 90.0, aspect_ratio)
+    camera::Camera::new(lookfrom, lookat, vup, 90.0, aspect_ratio, 0.1, 12.0)
 }
 
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
-    let img_width: usize = 1200;
+    let img_width: usize = 500;
     let img_height: usize = (img_width as f32 / aspect_ratio) as usize;
-    let number_of_samples = 400;
-    let depth = 20;
+    let number_of_samples = 100;
+    let depth = 10;
 
     let mut img = vec![
         vec![
@@ -236,6 +241,7 @@ fn main() {
 
     let cam = create_camera(aspect_ratio);
     let w = generate_world();
+    // let w = get_world();
 
     let c_rows = AtomicUsize::new(0);
     img.par_iter_mut().enumerate().for_each(|(i, row)| {

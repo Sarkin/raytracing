@@ -60,7 +60,7 @@ impl Hittable for Sphere {
             let n = if front_face { outward_n } else { -outward_n };
             HitRecord {
                 t,
-                p: p + outward_n * 1e-5,
+                p,
                 n,
                 front_face,
             }
